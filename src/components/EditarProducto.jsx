@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { nanoid } from 'nanoid';
+//import { nanoid } from 'nanoid';
 import { makeStyles } from '@material-ui/core/styles';
 //import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -19,6 +19,7 @@ import MuiAlert from '@material-ui/lab/Alert';
 function Alert(props) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -84,8 +85,8 @@ const useStyles = makeStyles((theme) => ({
     target: yup.string().required(),
   });*/
 
-const NuevoProducto = ({ setOpen, listaProductos, guardarListaProductos }) => {
-
+const EditarProducto = ({ setOpenEditar, ProductoEditar, listaProductos, guardarListaProductos }) => {
+    //let [descripcion, categoria, stock, precio, color, marca, composicion, target]=ProductoEditar;
     //state del formulario
     const [formData, actFormData] = useState({
         descripcion: '',
@@ -115,8 +116,8 @@ const NuevoProducto = ({ setOpen, listaProductos, guardarListaProductos }) => {
 
 
 
-    const handleClose = () => {
-        setOpen(false);
+    const handleCloseEditar = () => {
+        setOpenEditar(false);
     };
     const classes = useStyles();
     //const [cat, setCat] = useState('');
@@ -136,49 +137,25 @@ const NuevoProducto = ({ setOpen, listaProductos, guardarListaProductos }) => {
     //    setTarget(event.target.value);
     //};
     const [openGuardado, setOpenGuardado] = useState(false);
-    //const [picture, setPicture] = useState(`url('../static/img/camera.svg')`);
-    //const [imgData, setImgData] = useState(null);
-    const { register, handleSubmit, control, errors } = useForm();
+    const [picture, setPicture] = useState(`url('../static/img/camera.svg')`);
+    const [imgData, setImgData] = useState(null);
+    const { register, handleSubmit, control, errors } = useForm({ defaultValues: ProductoEditar });
     const onSubmit = (data) => {
-        //console.log(listaProductos);
+        data.id = ProductoEditar.id;
+        data.imagen = ProductoEditar.imagen;
+        data.inventario = ProductoEditar.inventario;
+        data.id = ProductoEditar.id;
+        //console.log(ProductoEditar);
         //console.log(data);
-        let newArray = [...listaProductos];
-        //console.log(newArray);
-        newArray.push(data);
-        data.id = nanoid();
-        data.imagen = 'zapato.png';
-        data.inventario = 'En stock';
-        //console.log(newArray);
-        guardarListaProductos(newArray);
+        guardarListaProductos(listaProductos.map(prod => (prod.id === data.id ? data : prod)));
         setOpenGuardado(true);
-        // subir imagen
-        //handleUpload();
         setTimeout(function () {
             handleCloseGuardado();
-            handleClose();
+            handleCloseEditar();
         }, 2000);
-        //openGuardado(false);
 
-        /*newArray.push({
-            id: nanoid(),
-            imagen: '',
-            descripcion: '',
-            categoria: '10',
-            stock: '',
-            precio: '',
-            color: '',
-            marca: '20',
-            composicion: '',
-            target: '30'
-        });
-        console.log(newArray);*/
-        //guardarListaProductos(newArray);
-
-        //Productos.push(data);
-
-
-    }
-    /*const onChangePicture = e => {
+    };
+    const onChangePicture = e => {
         if (e.target.files[0]) {
             //console.log("picture: ", e.target.files);
             setPicture(e.target.files[0]);
@@ -189,18 +166,7 @@ const NuevoProducto = ({ setOpen, listaProductos, guardarListaProductos }) => {
             });
             reader.readAsDataURL(e.target.files[0]);
         }
-    };*/
-    const [image, setImage] = useState({ preview: "", raw: "" });
-    const onChangePicture = e => {
-        if (e.target.files.length) {
-            setImage({
-              preview: URL.createObjectURL(e.target.files[0]),
-              raw: e.target.files[0]
-            });
-          }
-    }
-
-
+    };
     const handleCloseGuardado = (event, reason) => {
         if (reason === 'clickaway') {
             return;
@@ -208,60 +174,47 @@ const NuevoProducto = ({ setOpen, listaProductos, guardarListaProductos }) => {
 
         setOpenGuardado(false);
     };
-
-    const handleUpload = async () => {
-        //e.preventDefault();
-        const formData = new FormData();
-        //formData.append("image", image.raw);
-        formData.append("image", image.raw);
-    
-        await fetch(window.location.origin+"/static/img", {
-          method: "POST",
-          headers: {
-            "Content-Type": "multipart/form-data"
-          },
-          body: formData
-        });
-      };
-      
     return (
         <>
             <Snackbar open={openGuardado} onClose={handleCloseGuardado}>
                 <Alert onClose={handleCloseGuardado} severity="success">
-                    Producto registrado!
+                    Producto actualizado!
         </Alert>
             </Snackbar>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <Grid container className={classes.root} spacing={2}>
                     <Grid item xs={12} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        <img src="./static/img/cerrar.svg" alt="" style={{ cursor: 'pointer' }} onClick={handleClose} />
+                        <img src="../static/img/cerrar.svg" alt="" style={{ cursor: 'pointer' }} onClick={handleCloseEditar} />
                     </Grid>
                     <Grid item xs={4} style={{ backgroundColor: 'white' }}>
-                        <div className={classes.img} style={{ backgroundImage: `url('./static/img/camera.svg')` }} >
-                            <img src={image.preview} style={{ width: 386, height: 386, objectFit: 'contain' }} alt="" />
+                        <div className={classes.img} style={{ backgroundImage: picture }} >
+                            <img src={imgData} style={{ width: 386, height: 386, objectFit: 'contain' }} alt="" />
+
                         </div>
                         <Input type="file" onChange={onChangePicture}><img src="../static/img/add.svg" alt="" style={{ cursor: 'pointer' }} /></Input>
                         <label htmlFor="lbldescripcion" className={classes.labelFont}>DESCRIPCIÓN</label>
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            //inputRef={register({ required: { value: true, message: 'Valor requerido' } })}
-                            multiline
-                            rows={4}
-                            //required
-                            fullWidth
-                            id="descripcion"
-                            //label="Escribe algo que describa este producto"
-                            name="descripcion"
-                            onChange={handleChange}
-                            placeholder="Escribe algo que describa este producto"
-                            //autoComplete="email"
-                            autoFocus
-                            inputRef={register({ required: "Descripción requerida" })}
-                            error={Boolean(errors.descripcion)}
-                            helperText={errors.descripcion?.message}
-                        />
-
+                        <FormControl className={classes.formControl}>
+                            <TextField
+                                variant="outlined"
+                                margin="normal"
+                                //inputRef={register({ required: { value: true, message: 'Valor requerido' } })}
+                                multiline
+                                rows={4}
+                                //value={ProductoEditar.descripcion}
+                                //required
+                                fullWidth
+                                id="descripcion"
+                                //label="Escribe algo que describa este producto"
+                                name="descripcion"
+                                onChange={handleChange}
+                                placeholder="Escribe algo que describa este producto"
+                                //autoComplete="email"
+                                autoFocus
+                                inputRef={register({ required: "Descripción requerida" })}
+                                error={Boolean(errors.descripcion)}
+                                helperText={errors.descripcion?.message}
+                            />
+                        </FormControl>
                     </Grid>
                     <Grid container item xs={8} style={{ flexDirection: 'row', backgroundColor: 'white' }}>
                         <Grid item xs={12} style={{ backgroundColor: 'white' }}>
@@ -276,7 +229,7 @@ const NuevoProducto = ({ setOpen, listaProductos, guardarListaProductos }) => {
                                     label="Categoria"
                                     control={control}
                                     error={!!errors.categoria}
-                                    defaultValue={"Tenis"}
+                                    //defaultValue={categoria}
                                     variant="outlined"
                                     margin="normal"
                                 >
@@ -297,6 +250,7 @@ const NuevoProducto = ({ setOpen, listaProductos, guardarListaProductos }) => {
                                         margin="normal"
                                         label="Precio"
                                         onChange={handleChange}
+                                        //value={ProductoEditar.precio}
                                         //required
                                         fullWidth
                                         id="precio"
@@ -318,6 +272,7 @@ const NuevoProducto = ({ setOpen, listaProductos, guardarListaProductos }) => {
                                     label="Stock"
 
                                     onChange={handleChange}
+                                    //value={ProductoEditar.stock}
                                     //required
                                     fullWidth
                                     id="stock"
@@ -343,6 +298,7 @@ const NuevoProducto = ({ setOpen, listaProductos, guardarListaProductos }) => {
                                         margin="normal"
                                         label="Color"
                                         onChange={handleChange}
+                                        //value={ProductoEditar.color}
                                         //required
                                         fullWidth
                                         id="color"
@@ -362,6 +318,7 @@ const NuevoProducto = ({ setOpen, listaProductos, guardarListaProductos }) => {
                                         margin="normal"
                                         label="Composición"
                                         onChange={handleChange}
+                                        //value={ProductoEditar.composicion}
                                         //required
                                         fullWidth
                                         id="composicion"
@@ -386,7 +343,7 @@ const NuevoProducto = ({ setOpen, listaProductos, guardarListaProductos }) => {
                                     label="Marca"
                                     control={control}
                                     error={!!errors.marca}
-                                    defaultValue={"Nike"}
+                                    //defaultValue={ProductoEditar.marca}
                                     variant="outlined"
                                     margin="normal"
                                 >
@@ -405,7 +362,7 @@ const NuevoProducto = ({ setOpen, listaProductos, guardarListaProductos }) => {
                                     label="Target"
                                     control={control}
                                     error={!!errors.target}
-                                    defaultValue={"Niños"}
+                                    //defaultValue={ProductoEditar.target}
                                     variant="outlined"
                                     margin="normal"
                                 >
@@ -422,8 +379,7 @@ const NuevoProducto = ({ setOpen, listaProductos, guardarListaProductos }) => {
                             </Grid>
                         </Grid>
                         <Grid item xs={12} style={{ backgroundColor: 'white', display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end' }}>
-                            <Button variant="outlined" type="submit">Guardar</Button>
-                             {/* <button onClick={handleUpload}>Upload</button> */}
+                            <Button variant="outlined" type="submit">Actualizar</Button>
                         </Grid>
                     </Grid>
                 </Grid>
@@ -432,19 +388,4 @@ const NuevoProducto = ({ setOpen, listaProductos, guardarListaProductos }) => {
     );
 }
 
-export default NuevoProducto;
-
-/***
- * <Controller
-                            as={<input />}
-                            name="descripcion"
-                            control={control}
-                            defaultValue=""
-                            value={formData.descripcion}
-                            style={{ width: '100%' }}
-                            onChange={handleChange}
-                            placeholder="Escribe algo que describa este producto"
-                            ref={register}
-                        />
- *
- */
+export default EditarProducto;

@@ -10,17 +10,13 @@ function App() {
   
   return (
     <>
-      
      <Principal/>
-      
-      
       {/*
        <ListaProductos
         listaProductos={listaProductos}
       <NuevoProducto
       guardarListaProductos={guardarListaProductos}
-      
-      
+    
       <Router>
         <Header />
         <Switch>

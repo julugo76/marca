@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+//import { nanoid } from 'nanoid';
 import Inventario from './Inventario';
 import NuevoProducto from './NuevoProducto';
+import EditarProducto from './EditarProducto';
 //import Menu from './Menu';
 import Imagen from './Imagen';
 import IconButton from '@material-ui/core/IconButton';
@@ -115,10 +117,12 @@ const useStyles = makeStyles({
 const ListaProductos = ({ Productos }) => {
     //state de la lista de productos
     const [listaProductos, guardarListaProductos] = useState(Productos);
+    const [ProductoEditar, guardarProductoEditar] = useState();
+
     //State de la busqueda
     const [filterStr, actFilterStr] = useState('')
 
-    //tipos de ordenamiento en columna cantidad
+    //tipos de ordenamiento en columna stock
     const sortTypes = {
         upP: {
             class: 'ArrowDropUpIcon',
@@ -126,14 +130,14 @@ const ListaProductos = ({ Productos }) => {
         },
         upC: {
             class: 'ArrowDropUpIcon',
-            fn: (a, b) => a.cantidad - b.cantidad
+            fn: (a, b) => a.stock - b.stock
         },
         downP: {
             class: 'ArrowDropDownIcon',
             fn: (a, b) => b.precio - a.precio
         }, downC: {
             class: 'ArrowDropDownIcon',
-            fn: (a, b) => b.cantidad - a.cantidad
+            fn: (a, b) => b.stock - a.stock
         }
         ,
         defaultP: {
@@ -155,6 +159,7 @@ const ListaProductos = ({ Productos }) => {
     const classes2 = useStylesM();
     const [modalStyle] = React.useState(getModalStyle);
     const [open, setOpen] = useState(false);
+    const [openEditar, setOpenEditar] = useState(false);
     const [deleteopen, setDeleteOpen] = useState(false);
     const [iddelete, setIdDelete] = useState();
 
@@ -168,6 +173,7 @@ const ListaProductos = ({ Productos }) => {
     const handleDeleteClose = () => {
         setDeleteOpen(false);
     };
+
     //abre modal de nuevo
     const handleOpen = () => {
         setOpen(true);
@@ -175,6 +181,15 @@ const ListaProductos = ({ Productos }) => {
     //cierra modal de nuevo
     const handleClose = () => {
         setOpen(false);
+    };
+
+    //abre modal de editar
+    const handleOpenEditar = () => {
+        setOpenEditar(true);
+    };
+    //cierra modal de editar
+    const handleCloseEditar = () => {
+        setOpenEditar(false);
     };
 
     //Elimina y cierra modal
@@ -189,11 +204,29 @@ const ListaProductos = ({ Productos }) => {
         setIdDelete(id)
         handleDeleteOpen();
     }
+    //Editar Producto
+    const editarProducto = (producto) => {
+        guardarProductoEditar(producto);
+        handleOpenEditar();
+    }
 
-    const body = (
+    const bodyNuevo = (
         <div style={modalStyle} className={classes2.paper}>
             <NuevoProducto
                 setOpen={setOpen}
+                listaProductos={listaProductos}
+                guardarListaProductos={guardarListaProductos}
+            />
+        </div>
+    );
+
+    const bodyEditar = (
+        <div style={modalStyle} className={classes2.paper}>
+            <EditarProducto
+                setOpenEditar={setOpenEditar}
+                ProductoEditar={ProductoEditar}
+                listaProductos={listaProductos}
+                guardarListaProductos={guardarListaProductos}
             />
         </div>
     );
@@ -222,7 +255,7 @@ const ListaProductos = ({ Productos }) => {
         return (
             <>
                 <StyledTableCell align="center">Imagen</StyledTableCell>
-                <StyledTableCell align="center">Nombre</StyledTableCell>
+                <StyledTableCell align="center">Descripción</StyledTableCell>
                 <StyledTableCell align="center">Categoría</StyledTableCell>
                 <StyledTableCell align="center" style={{ cursor: 'pointer' }} onClick={ordenaPrecio}>Precio {(sortTypes[currentSortP].class === 'ArrowDropUpIcon') ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />}</StyledTableCell>
                 <StyledTableCell align="center" style={{ cursor: 'pointer' }} onClick={ordenaCantidad}>Cantidad {(sortTypes[currentSortC].class === 'ArrowDropUpIcon') ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />} </StyledTableCell>
@@ -236,7 +269,7 @@ const ListaProductos = ({ Productos }) => {
     const renderBody = () => {
         let resultado = null;
         resultado = listaProductos.sort(sortTypes[currentSort].fn)
-            .filter(producto => producto['nombre'].includes(filterStr) || producto['categoria'].includes(filterStr) || String(producto['precio']).includes(filterStr))
+            .filter(producto => producto['descripcion'].includes(filterStr) || producto['composicion'].includes(filterStr) || producto['categoria'].includes(filterStr) || String(producto['precio']).includes(filterStr))
             .map((producto, index) => {
 
                 return (
@@ -248,14 +281,15 @@ const ListaProductos = ({ Productos }) => {
                                 ruta={producto.imagen}
                             />
                         </StyledTableCell>
-                        <StyledTableCell align="center">{producto.nombre}</StyledTableCell>
+                        <StyledTableCell align="center"><div>{producto.descripcion}<div style={{ fontSize: 9, color: 'gray' }}>{producto.composicion}</div></div></StyledTableCell>
                         <StyledTableCell align="center">{producto.categoria}</StyledTableCell>
                         <StyledTableCell align="center">{producto.precio}</StyledTableCell>
-                        <StyledTableCell align="center">{producto.cantidad}</StyledTableCell>
+                        <StyledTableCell align="center">{producto.stock}</StyledTableCell>
                         <StyledTableCell align="center"><Inventario texto={producto.inventario} /></StyledTableCell>
-                        <StyledTableCell align="center"><IconButton aria-label="edit">
-                            <EditIcon />
-                        </IconButton>
+                        <StyledTableCell align="center">
+                            <IconButton aria-label="edit" onClick={() => editarProducto(producto)}>
+                                <EditIcon />
+                            </IconButton>
 
                             <IconButton aria-label="delete" onClick={() => eliminarProducto(producto.id)}>
                                 <DeleteIcon />
@@ -324,7 +358,16 @@ const ListaProductos = ({ Productos }) => {
                 aria-labelledby="simple-modal-title"
                 aria-describedby="simple-modal-description"
             >
-                {body}
+                {bodyNuevo}
+            </Modal>
+
+            <Modal
+                open={openEditar}
+                onClose={handleCloseEditar}
+                aria-labelledby="simple-modal-title"
+                aria-describedby="simple-modal-description"
+            >
+                {bodyEditar}
             </Modal>
         </div>
     );

@@ -38,25 +38,36 @@ const useStyles = makeStyles((theme) => ({
 const Principal = () => {
     const Productos = [];
     //Genera registros
-    let inv = '', cant = 0, cat='';
+    let inv = '', cant = '0', cat='';
 
     for (let i = 1; i < 7; i++) {
 
         if (i === 1 || i === 3 ) {
             inv = 'En stock'
-            cant = 20;
+            cant = '20';
             cat='Tenis';
         } else if (i === 4 || i === 6) {
             inv = 'Limitado';
-            cant = 10;
+            cant = '10';
             cat='Zapato';
         } else {
             inv = 'Agotado'
-            cant = 0;
+            cant = '0';
             cat='Bota'
         }
-
-        let producto = { id: nanoid(), imagen: 'zapato.png', nombre: 'Zapato' + i, descripcion: '84% Poliester, 16% Elástano', categoria: cat, precio: 342.97-i, cantidad: cant, inventario: inv };
+        let producto = { 
+            id: nanoid(), 
+            imagen: 'zapato.png', 
+            descripcion: 'Zapato' + i, 
+            composicion: '84% Poliester, 16% Elástano', 
+            categoria: cat, 
+            precio: String(342.97-i), 
+            stock: cant, 
+            color:'Blanco',
+            marca:'Nike',
+            target: "Niños",
+            inventario: inv };
+       // let producto = { id: nanoid(), imagen: 'zapato.png', nombre: 'Zapato' + i, descripcion: '84% Poliester, 16% Elástano', categoria: cat, precio: 342.97-i, cantidad: cant, inventario: inv };
         Productos.push(producto);
         
 

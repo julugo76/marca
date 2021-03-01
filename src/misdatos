@@ -1,0 +1,31 @@
+let producto = { 
+    id: nanoid(), 
+    imagen: 'zapato.png', 
+    nombre: 'Zapato' + i, 
+    descripcion: '84% Poliester, 16% Elástano', 
+    categoria: cat, 
+    precio: 342.97-i, 
+    cantidad: cant, 
+    inventario: inv };
+
+    descripcion,
+    categoria,
+    precio,
+    stock,
+    color,
+    composicion,
+    marca,
+    target
+
+let producto = { 
+    id: nanoid(), 
+    imagen: 'zapato.png', 
+    descripcion: 'Zapato' + i, 
+    composicion: '84% Poliester, 16% Elástano', 
+    categoria: cat, 
+    precio: 342.97-i, 
+    stock: cant, 
+    target: ""
+    inventario: inv };
+
+
